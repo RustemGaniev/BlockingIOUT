@@ -1,46 +1,48 @@
 package com.company;
 
-
-import java.net.*;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
 
-    private static final int port   = 5001;
+
     public static void main(String[] args) throws IOException {
-        {
-            ServerSocket srvSocket = null;
-            try {
-                try {
-                    int i = 0;
+       
+        ServerSocket servSocket = new ServerSocket(23444);
+        while (true) {
 
-                    InetAddress ia;
-                    ia = InetAddress.getByName("localhost");
-                    srvSocket = new ServerSocket(port, 0, ia);
+            try (Socket socket = servSocket.accept();
+                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new
+                         InputStreamReader(socket.getInputStream()))) {
+                String line;
+                while ((line = in.readLine()) != null) {
 
-                    System.out.println("Server started\n\n");
+                    int result = fibonacci(Integer.parseInt(line));
+                    out.println(" Число Фибоначи для " + line + " = " + result);
 
-                    while(true) {
-
-                        Socket socket = srvSocket.accept();
-                        System.err.println("Client accepted");
-
-                        new Server().setSocket(i++, socket);
+                    if (line.equals("end")) {
+                        break;
                     }
-                } catch(Exception e) {
-                    System.out.println("Exception : " + e);
                 }
-            } finally {
-                try {
-                    if (srvSocket != null)
-                        srvSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            } catch (IOException ex) {
+                ex.printStackTrace(System.out);
             }
-            System.exit(0);
         }
+    }
+
+    public static int fibonacci(int fiboN) {
+        int a = 0;
+        int b = 1;
+        for (int i = 2; i <= fiboN; ++i) {
+            int next = a + b;
+            a = b;
+            b = next;
+        }
+        return b;
     }
 }

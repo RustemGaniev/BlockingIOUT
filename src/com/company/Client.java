@@ -1,77 +1,29 @@
 package com.company;
-import java.net.*;
+
 import java.io.*;
+import java.net.Socket;
+import java.util.Scanner;
 
-public class Client
-{
-    private  static final int    serverPort = 5001;
-    private  static final String localhost  = "127.0.0.1";
+public class Client {
 
-    public static void main(String[] ar)
-    {
-        Socket socket = null;
-        try{
-            try {
-                System.out.println("Welcome to Client side\n" +
-                        "Connecting to the server\n\t" +
-                        "(IP address " + localhost +
-                        ", port " + serverPort + ")");
-                InetAddress ipAddress;
-                ipAddress = InetAddress.getByName(localhost);
-                socket = new Socket(ipAddress, serverPort);
-                System.out.println(
-                        "The connection is established.");
-                System.out.println(
-                        "\tLocalPort = " +
-                                socket.getLocalPort() +
-                                "\n\tInetAddress.HostAddress = " +
-                                socket.getInetAddress()
-                                        .getHostAddress() +
-                                "\n\tReceiveBufferSize (SO_RCVBUF) = "
-                                + socket.getReceiveBufferSize());
+    public static void main(String[] ar) throws IOException {
 
-                InputStream  sin  = socket.getInputStream();
-                OutputStream sout = socket.getOutputStream();
+        Socket socket = new Socket("127.0.0.1", 23444);
 
-                DataInputStream  in ;
-                DataOutputStream out;
-                in  = new DataInputStream (sin );
-                out = new DataOutputStream(sout);
+        try (BufferedReader in = new BufferedReader(
+                new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(
+                     new OutputStreamWriter(socket.getOutputStream()), true);
+             Scanner scanner = new Scanner(System.in)) {
 
-                InputStreamReader isr;
-                isr = new InputStreamReader(System.in);
-                BufferedReader keyboard;
-                keyboard = new BufferedReader(isr);
-                String line = null;
-                System.out.println(
-                        " Введите число от 1 до 47 для расчета N-ого числа Фибоначи  или quit для завершения работы : \n");
-                System.out.println();
-                while (true) {
+            String msg;
+            while (true) {
+                System.out.println(" Введите число от 1 до 47 для расчета N-ого числа Фибоначи  или end для завершения работы : \n");
+                msg = scanner.nextLine();
+                out.println(msg);
+                if ("end".equals(msg)) break;
 
-                    line = keyboard.readLine();
-
-                    out.writeUTF(line);
-
-                    out.flush();
-
-                    line = in.readUTF();
-                    if (line.endsWith("quit"))
-                        break;
-                    else {
-                        System.out.println(
-                                "Сервер рассчитал число Фибоначи :\n\t"
-                                        + line);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } finally {
-            try {
-                if (socket != null)
-                    socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("SERVER: " + in.readLine());
             }
         }
     }
